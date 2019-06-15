@@ -6,13 +6,13 @@ set(SOURCES
     main.cpp
 
     communication/tcp_server.cpp
-    communication/tcp_client.cpp
+    communication/tcp_client.cpp)
     
 
 set(HEADERS
     ${D20_TEMPEST_INCLUDE}/communication/iclient.hpp
     ${D20_TEMPEST_INCLUDE}/communication/tcp_server.hpp
-    ${D20_TEMPEST_INCLUDE}/communication/tcp_client.hpp
+    ${D20_TEMPEST_INCLUDE}/communication/tcp_client.hpp)
     
 
 add_executable(d20tempest ${SOURCES} ${HEADERS})

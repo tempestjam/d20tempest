@@ -32,6 +32,7 @@ namespace d20tempest::components
     public:
         explicit Ability(const std::string& scriptPath) : m_scriptPath(scriptPath)
         {
+            m_luaState.open_libraries(sol::lib::base, sol::lib::package, sol::lib::math, sol::lib::count);
             m_luaState.script_file(scriptPath);
             m_getModifier = m_luaState["getModifier"];
             m_checkValueBeforeSet = m_luaState["checkValueBeforeSet"];

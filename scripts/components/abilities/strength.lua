@@ -2,9 +2,9 @@ name = "Strength"
 shortName = "STR"
 
 function getModifier()
-    return (Strength() / 2) + TempSTRBonus()
+    return math.floor((Strength() / 2)) - 5 + TempSTRBonus()
 end
 
 function checkValueBeforeSet(val)
-    return val < 100
+    return true
 end

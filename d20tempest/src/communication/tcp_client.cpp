@@ -1,7 +1,16 @@
+#include <nlohmann/json.hpp>
+
 #include "communication/tcp_client.hpp"
 
 namespace d20tempest::communication
 {   
+    enum class Messages : uint64_t
+    {
+        LeavePartyMsg = 0x00,
+        JoinPartyMsg  = 0x01,
+        ConnectionMsg = 0x02,
+    };
+
     class TCPClientImpl
     {
     private:
@@ -18,12 +27,7 @@ namespace d20tempest::communication
         {
             m_clientHandler->on<uvw::DataEvent>([this](const uvw::DataEvent& evt, uvw::TCPHandle& client)
             {
-                std::string_view dataView(evt.data.get(), evt.length);
-
-                for(auto& h : m_messageHandlers)
-                {
-                    h(dataView);
-                }
+                ParseMsg(std::string(evt.data.get(), evt.length));
             });
 
             m_clientHandler->on<uvw::EndEvent>([this](const uvw::EndEvent& evt, uvw::TCPHandle& client)
@@ -50,7 +54,7 @@ namespace d20tempest::communication
             return m_id;
         }
 
-        virtual void OnMessage(ClientMessageHandler handler)
+        void OnMessage(ClientMessageHandler handler)
         {
             if(handler == nullptr)
             {
@@ -60,7 +64,7 @@ namespace d20tempest::communication
             m_messageHandlers.push_back(handler);
         }
 
-        virtual void OnLeave(ClientDisconnectedHandler handler)
+        void OnLeave(ClientDisconnectedHandler handler)
         {
             if(handler == nullptr)
             {
@@ -70,25 +74,76 @@ namespace d20tempest::communication
             m_disconnectionHandlers.push_back(handler);
         }
 
-        virtual void Send(std::vector<std::byte>& msg)
+        void Send(std::vector<std::byte>& msg)
         {
             if(!m_clientHandler->active())
             {
                 return;
             }
 
-            m_clientHandler->write(reinterpret_cast<char*>(msg.data()), msg.size());
+            m_clientHandler->write(reinterpret_cast<char*>(msg.data()), gsl::narrow<unsigned int, size_t>(msg.size()));
         }
 
-        virtual void Send(std::vector<std::byte>&& msg)
+        void Send(std::vector<std::byte>&& msg)
         {
             if(!m_clientHandler->active())
             {
                 return;
             }
 
-            m_clientHandler->write(reinterpret_cast<char*>(msg.data()), msg.size());
+            m_clientHandler->write(reinterpret_cast<char*>(msg.data()), gsl::narrow<unsigned int, size_t>(msg.size()));
             msg.clear();
+        }
+
+        void Send(std::string& msg)
+        {
+             if(!m_clientHandler->active())
+            {
+                return;
+            }
+
+            m_clientHandler->write(msg.data(), gsl::narrow<unsigned int, size_t>(msg.size()));
+        }
+
+    private:
+        void ParseMsg(const std::string& dataView)
+        {
+            auto docJson = nlohmann::json::parse(dataView, nullptr, false);
+            if(docJson.is_discarded())
+            {
+                //Send back error
+                return;
+            }
+            
+            //A msg should at least contains a msg or a partyID
+            if(!docJson.contains("msg"))
+            {
+                //Send back error
+                return;
+            }
+
+            switch (docJson["msg"].get<uint64_t>())
+            {
+            case static_cast<uint64_t>(Messages::ConnectionMsg):
+                //Create the player
+
+                break;
+            case static_cast<uint64_t>(Messages::JoinPartyMsg):
+                //Send join party event
+
+                break;
+            case static_cast<uint64_t>(Messages::LeavePartyMsg):
+                //Send leave party event
+                
+                break;
+            default:
+                //Other message
+                for(auto& h : m_messageHandlers)
+                {
+                    h(dataView);
+                }
+                break;
+            }
         }
     };
 

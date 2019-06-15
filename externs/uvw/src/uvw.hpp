@@ -1,6 +1,3 @@
-#define _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-
 #include "uvw/async.hpp"
 #include "uvw/check.hpp"
 #include "uvw/dns.hpp"
@@ -22,6 +19,3 @@
 #include "uvw/udp.hpp"
 #include "uvw/util.hpp"
 #include "uvw/work.hpp"
-
-#undef _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-#undef _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING

@@ -1,4 +1,4 @@
-#include "components/characteristic.hpp"
+#include "components/ability.hpp"
 
 namespace d20tempest::components
 {

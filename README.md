@@ -1,2 +1,3 @@
-# d20tempest
+# D20tempest
+
 A manager for D20 RPG

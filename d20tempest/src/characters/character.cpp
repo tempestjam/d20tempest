@@ -1,4 +1,5 @@
 #include "characters/character.hpp"
+#include "characters/character_manager.hpp"
 
 namespace d20tempest::character
 {
@@ -15,12 +16,29 @@ namespace d20tempest::character
             m_client.value()->OnLeave([this]()
             {
                 //Save and destroy
+                CharacterManager manager;
+                manager.Dump(m_characterID);
             });
 
-            m_client.value()->OnMessage("character/ability" ,[this](auto, auto, auto)
+            m_client.value()->OnMessage("character/ability" ,[this](const std::string_view& path, const std::string_view& action, const nlohmann::json& data)
             {
-                //Save and destroy
-
+                //Change ability
+                if(action == "ADD")
+                {
+                    
+                }
+                else if(action == "UPDATE")
+                {
+                    
+                }
+                else if(action == "GET")
+                {
+                    
+                }
+                else if(action == "DELETE")
+                {
+                    
+                }
             });
 
         }

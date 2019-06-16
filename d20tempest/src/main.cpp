@@ -26,5 +26,6 @@ int main(int argc, char* argv[])
 
     std::cin.ignore();
 
-    d20tempest::character::CharacterManager::Dump();
+    d20tempest::character::CharacterManager manager;
+    manager.Dump();
 }

@@ -1,6 +1,7 @@
 #include <nlohmann/json.hpp>
 
 #include "characters/character_manager.hpp"
+#include "characters/character.hpp"
 #include "communication/tcp_client.hpp"
 
 namespace d20tempest::communication
@@ -15,6 +16,7 @@ namespace d20tempest::communication
     class TCPClientImpl
     {
     private:
+        character::CharacterManager m_manager;  
         gsl::not_null<uvw::TCPHandle*> m_clientHandler;
 
         std::map<std::string, std::vector<ClientMessageHandler>> m_messageHandlers;
@@ -33,9 +35,12 @@ namespace d20tempest::communication
         {
             m_clientHandler->on<uvw::DataEvent>([this](const uvw::DataEvent& evt, uvw::TCPHandle& client)
             {
-                if(*((uint32_t*)evt.data.get()) == 0x00C0FFEE)
+                uint32_t firstFour = *((uint32_t*)evt.data.get());
+                firstFour = ntohl(firstFour);
+                if(evt.length >= 4 && firstFour == 0x00C0FFEE)
                 {
                     uint32_t ms_reply = 0x000B00B5;
+                    ms_reply = htonl(ms_reply);
                     Send(std::vector<std::byte>(reinterpret_cast<std::byte*>(&ms_reply), reinterpret_cast<std::byte*>(&ms_reply) + 4));
                     m_heloParsed = true;
                     return;
@@ -84,7 +89,7 @@ namespace d20tempest::communication
                 return;
             }
 
-            std::string toUpperPath = "";
+            std::string toUpperPath = path;
             std::transform(path.begin(), path.end(), toUpperPath.begin(), ::toupper); 
 
             if(m_messageHandlers.find(toUpperPath) == m_messageHandlers.end())
@@ -150,7 +155,7 @@ namespace d20tempest::communication
             }
             
             //A msg should at least contains a msg or a partyID
-            if(!docJson.contains("name") || !docJson.contains("action") || !docJson.contains("data") || !docJson.contains("entity"))
+            if(!docJson.contains("name") || !docJson.contains("action") || !docJson.contains("entity"))
             {
                 nlohmann::json error;
                 error["code"] = 400;
@@ -169,14 +174,30 @@ namespace d20tempest::communication
             //Create character handler
             if(action == "CREATE" && path == "CHARACTER")
             {
-                CreateCharacterHandler(name, docJson["data"]);
+                CreateCharacterHandler(name);
                 return;
             }
 
             //Load character handler
             if(action == "LOAD" & path == "CHARACTER")
             {
-                LoadCharacterHandler(name, docJson["data"]);
+                LoadCharacterHandler(name);
+                return;
+            }
+
+            //Load character handler
+            if(action == "LOAD" & path == "CHARACTER")
+            {
+                LoadCharacterHandler(name);
+                return;
+            }
+
+            if(!docJson.contains("data"))
+            {
+                nlohmann::json error;
+                error["code"] = 400;
+                error["msg"] = "Missing elements in JSON";
+                Send(error.dump());
                 return;
             }
 
@@ -184,21 +205,35 @@ namespace d20tempest::communication
             DataCharacterHandler(name, path, action, docJson["data"]);
         }
 
-        void CreateCharacterHandler(const std::string& name, const nlohmann::json& docJson)
+        void GetCharacter()
         {
-            auto character = character::CharacterManager::CreateCharacter(name, std::make_optional(m_interface));
+
+        }
+
+        void ListCharacters()
+        {
+
+        }
+
+        void CreateCharacterHandler(const std::string& name)
+        {
+            auto character = m_manager.CreateCharacter(name, std::make_optional(m_interface));
             if(character == nullptr)
             {
                 nlohmann::json error;
                 error["code"] = 409;
                 error["msg"] = "Unable to create character (already exist?)";
                 Send(error.dump());
+                return;
             }
+
+            m_manager.Dump(character->ID());
+            Send(character->Save().dump(4));
         }
 
-        void LoadCharacterHandler(const std::string& name, const nlohmann::json& docJson)
+        void LoadCharacterHandler(const std::string& name)
         {
-            auto character = character::CharacterManager::LoadCharacter(name, std::make_optional(m_interface));
+            auto character = m_manager.LoadCharacter(name, std::make_optional(m_interface));
             if(character == nullptr)
             {
                 nlohmann::json error;
@@ -206,6 +241,7 @@ namespace d20tempest::communication
                 error["msg"] = "Unknown entity";
                 Send(error.dump());
             }
+            Send(character->Save().dump(4));
         }
 
         void DataCharacterHandler(const std::string& name, const std::string& entity, const std::string& action, const nlohmann::json& data)

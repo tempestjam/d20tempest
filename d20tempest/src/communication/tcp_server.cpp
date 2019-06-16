@@ -25,7 +25,6 @@ namespace d20tempest::communication
             m_serverHandle->on<uvw::ListenEvent>([this](const uvw::ListenEvent &, uvw::TCPHandle &srv)
             {
                 auto clientHandle = srv.loop().resource<uvw::TCPHandle>();
-
                 clientHandle->on<uvw::CloseEvent>([this](const uvw::CloseEvent& evt, uvw::TCPHandle& handle) 
                 { 
                     auto client = std::static_pointer_cast<TCPClient>(handle.data()); 

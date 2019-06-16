@@ -2,5 +2,56 @@
 
 namespace d20tempest::character
 {
+    std::optional<std::shared_ptr<components::Ability<int>>> Character::AddAbility(const std::string& scriptName, const int defaultValue/* = 0*/)
+    {
+        if(m_abilities.find(scriptName) != m_abilities.end())
+        {
+            return {};
+        }
 
+        std::stringstream sstream;
+        sstream << ms_abilitiesScriptPath << scriptName << ms_scriptExtension; 
+        auto ability = std::make_shared<components::Ability<int>>(sstream.str(), defaultValue);
+        m_abilities.insert(std::make_pair(scriptName, ability));
+        return ability;
+    }
+
+    nlohmann::json Character::Save() const
+    {
+        nlohmann::json root;
+        
+        root["name"] = m_name;
+        root["id"] = m_characterID;
+
+        //Abilities
+        std::map<std::string, nlohmann::json> serializedAbilities;
+        for(auto&[key, ability] : m_abilities)
+        {
+            serializedAbilities.insert(std::make_pair(key, ability->Save()));
+        }
+        root["abilities"] = serializedAbilities;
+
+        return root;
+    }
+
+    const void Character::Load(const nlohmann::json& root)
+    {
+        if(root.is_discarded() &&
+            (root.find("name") == root.end() || root.find("abilities") == root.end()) || root.find("id") == root.end())
+        {
+            throw std::invalid_argument("Content for loading is not in the good format");
+        }
+
+        m_characterID = root["id"];
+        m_name = root["name"];
+
+        for(auto& [key, value] : root["abilities"].items())
+        {
+            std::stringstream sstream;
+            sstream << ms_abilitiesScriptPath << key << ms_scriptExtension; 
+            auto ability = std::make_shared<components::Ability<int>>(sstream.str());
+            ability->Load(value);
+            m_abilities.insert(std::make_pair(key, ability));
+        }
+    }
 } // namespace d20tempest::character

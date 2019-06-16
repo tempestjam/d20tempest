@@ -34,6 +34,12 @@ int main(int argc, char* argv[])
     charac.AddAbility("wisdom", 14);
     charac.AddAbility("charism", 20);
 
+    auto val = charac.Save();
+    
+    d20tempest::character::Character charac2;
+    charac2.Load(val);
+
+    std::cout << charac2.Save().dump(4) << std::endl;
 
     // d20tempest::communication::TCPServer server("0.0.0.0", 7777);
     // std::cout << "Server launched" << std::endl;

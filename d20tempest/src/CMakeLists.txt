@@ -6,6 +6,7 @@ set(SOURCES
     main.cpp
 
     characters/character.cpp
+    characters/character_manager.cpp
 
     communication/tcp_server.cpp
     communication/tcp_client.cpp
@@ -20,6 +21,7 @@ set(HEADERS
     ${D20_TEMPEST_INCLUDE}/communication/tcp_client.hpp
     
     ${D20_TEMPEST_INCLUDE}/characters/character.hpp
+    ${D20_TEMPEST_INCLUDE}/characters/character_manager.hpp
     
     ${D20_TEMPEST_INCLUDE}/components/ability.hpp
     

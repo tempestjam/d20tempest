@@ -2,6 +2,29 @@
 
 namespace d20tempest::character
 {
+    Character::Character(const uint64_t characterID, const std::string& name, std::optional<gsl::not_null<communication::IClient*>> client) : 
+            m_characterID(characterID),
+            m_name(name),
+            m_client(client)
+        {
+            if(!m_client.has_value())
+            {
+                return;
+            }
+
+            m_client.value()->OnLeave([this]()
+            {
+                //Save and destroy
+            });
+
+            m_client.value()->OnMessage("character/ability" ,[this](auto, auto, auto)
+            {
+                //Save and destroy
+
+            });
+
+        }
+
     std::optional<std::shared_ptr<components::Ability<int>>> Character::AddAbility(const std::string& scriptName, const int defaultValue/* = 0*/)
     {
         if(m_abilities.find(scriptName) != m_abilities.end())
@@ -54,4 +77,15 @@ namespace d20tempest::character
             m_abilities.insert(std::make_pair(key, ability));
         }
     }
+
+    std::string Character::Name() const
+    {
+        return m_name;
+    }
+
+    uint64_t Character::ID() const
+    {
+        return m_characterID;
+    }
+    
 } // namespace d20tempest::character

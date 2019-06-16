@@ -6,6 +6,7 @@
 ### Project specific ###
 build/
 output/
+!externs/nlohmann/include/nlohmann/detail/output
 
 ### C++ ###
 # Prerequisites

@@ -1,33 +1,41 @@
 #include <iostream>
+#include <cassert>
+#include <string>
 
-#include <entt/entt.hpp>
-#include <gsl/gsl>
+#include <filesystem>
+namespace fs = std::filesystem;
 
-struct position {
-    float x;
-    float y;
-};
-
-struct velocity {
-    float dx;
-    float dy;
-};
+#include "communication/tcp_server.hpp"
+#include "components/ability.hpp"
+#include "characters/character.hpp"
 
 int main(int argc, char* argv[])
 {
-    //Test entt
-    entt::registry registry;
-    for(auto i = 0; i < 10; ++i) 
+    std::string path = "./scripts/components/abilities";
+    for (const auto & entry : fs::directory_iterator(path))
     {
-        auto entity = registry.create();
-        registry.assign<position>(entity, i * 1.f, i * 1.f);
-        if(i % 2 == 0) { registry.assign<velocity>(entity, i * .1f, i * .1f); }
+        d20tempest::components::Ability<int> strength(entry.path().generic_string());
+        strength.Value(18);
+        std::cout << strength.ShortName() << " : " << strength.Modifier() << std::endl;
+        strength.Temp(-2);
+        std::cout << strength.ShortName() << " : " << strength.Modifier() << std::endl;
+        strength.Temp(4);
+        std::cout << strength.ShortName() << " : " << strength.Modifier() << std::endl;
+        strength.ResetTemp();
+        std::cout << strength.ShortName() << " : " << strength.Modifier() << std::endl;
+        std::cout << std::endl;
     }
 
-    //Test GSL and C++17
-    std::byte foo = gsl::narrow_cast<std::byte>(0x00);
-    auto notNull = gsl::make_not_null<std::byte*>(&foo);
+    d20tempest::character::Character charac(0x00, "Aldor");
+    charac.AddAbility("strength", 10);
+    charac.AddAbility("dexterity", 16);
+    charac.AddAbility("constitution", 14);
+    charac.AddAbility("intelligence", 18);
+    charac.AddAbility("wisdom", 14);
+    charac.AddAbility("charism", 20);
 
-    std::cout << "Hello world" << std::endl;
+
+    // d20tempest::communication::TCPServer server("0.0.0.0", 7777);
+    // std::cout << "Server launched" << std::endl;
     std::cin.ignore();
 }

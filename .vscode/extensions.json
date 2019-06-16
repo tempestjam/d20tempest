@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "vector-of-bool.cmake-tools",
+        "twxs.cmake",
+        "jeff-hykin.better-cpp-syntax",
+        "aaron-bond.better-comments",
+        "CoenraadS.bracket-pair-colorizer",
+        "ms-vsliveshare.vsliveshare",
+        "ms-vsliveshare.vsliveshare-audio",
+        "ms-vsliveshare.vsliveshare-pack",
+        "alefragnani.Bookmarks",
+        "eamodio.gitlens"
+    ]
+}

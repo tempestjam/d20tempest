@@ -6,11 +6,14 @@ set(SOURCES
     main.cpp
 
     characters/character.cpp
+    characters/character_manager.cpp
 
     communication/tcp_server.cpp
     communication/tcp_client.cpp
     
-    components/ability.cpp)
+    components/ability.cpp
+    
+    serialization/iserializable.cpp)
 
 set(HEADERS
     ${D20_TEMPEST_INCLUDE}/communication/iclient.hpp
@@ -18,8 +21,11 @@ set(HEADERS
     ${D20_TEMPEST_INCLUDE}/communication/tcp_client.hpp
     
     ${D20_TEMPEST_INCLUDE}/characters/character.hpp
+    ${D20_TEMPEST_INCLUDE}/characters/character_manager.hpp
     
-    ${D20_TEMPEST_INCLUDE}/components/ability.hpp)
+    ${D20_TEMPEST_INCLUDE}/components/ability.hpp
+    
+    ${D20_TEMPEST_INCLUDE}/serialization/iserializable.hpp)
 
 add_executable(d20tempest ${SOURCES} ${HEADERS})
 target_include_directories(d20tempest PRIVATE ${D20_TEMPEST_INCLUDE})

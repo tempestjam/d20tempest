@@ -7,6 +7,10 @@
 
 #include <sol3/sol.hpp>
 
+#include <nlohmann/json.hpp>
+
+#include "serialization/iserializable.hpp"
+
 namespace d20tempest::components
 {
     // the partial specialization of A is enabled via a template parameter
@@ -14,7 +18,7 @@ namespace d20tempest::components
     class Ability {}; // primary template
 
     template<typename T>
-    class Ability<T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
+    class Ability<T, typename std::enable_if<std::is_arithmetic<T>::value>::type> : public serialization::ISerializable
     {
     private:
         T m_abilityValue = 0;
@@ -103,6 +107,35 @@ namespace d20tempest::components
         {
             m_tempBonus = 0;
             m_cacheInvalidated = true;
+        }
+
+        virtual nlohmann::json Save() const
+        {
+            nlohmann::json root;
+            root["value"] = m_abilityValue;
+
+            if(m_cacheInvalidated)
+            {
+                m_modifierCache = m_getModifier();
+            }
+
+            root["modifier"] = m_modifierCache;
+            root["temp"] = m_tempBonus;
+            root["name"] = m_name;
+            root["short_name"] = m_shortName;
+            return root;
+        }
+
+        virtual const void Load(const nlohmann::json& root)
+        {
+            if(root.is_discarded() &&
+                (root.find("value") == root.end() || root.find("temp") == root.end()))
+            {
+                throw std::invalid_argument("Content for loading is not in the good format");
+            }
+
+            m_abilityValue = root["value"];
+            m_tempBonus = root["temp"];
         }
     };
 }

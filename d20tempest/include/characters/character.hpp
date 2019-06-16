@@ -7,34 +7,30 @@
 #include <sstream>
 #include <type_traits>
 
+#include <gsl/gsl>
+
 #include "components/ability.hpp"
+#include "communication/iclient.hpp" 
+
+#include "serialization/iserializable.hpp" 
 
 namespace d20tempest::character
 {
-    class Character
+    class Character : public serialization::ISerializable
     {
     private:
-        const uint64_t m_characterID;
-        const std::string m_name;
+        uint64_t m_characterID;
+        std::string m_name;
         
+        std::optional<gsl::not_null<communication::IClient*>> m_client;
+
+        static constexpr char ms_abilitiesScriptPath[] = "./scripts/components/abilities/";
+        static constexpr char ms_scriptExtension[] = ".lua";
+
         std::map<std::string, std::shared_ptr<components::Ability<int>>> m_abilities;
     public:
-        static Character Load(const uint64_t characterID)
-        {
-
-        }
-
-        static Character Create(const std::string& name)
-        {
-
-        }
-
-        Character(const uint64_t characterID, const std::string& name) : 
-            m_characterID(characterID),
-            m_name(name)
-        {
-
-        }
+        Character() = default;
+        Character(const uint64_t characterID, const std::string& name, std::optional<gsl::not_null<communication::IClient*>> client);
 
         Character(const Character& other) = default;
         Character(Character&& other) = default;
@@ -44,18 +40,12 @@ namespace d20tempest::character
         Character& operator=(const Character& rhs) = default;
         Character& operator=(Character&& rhs) = default;
 
-        std::optional<std::shared_ptr<components::Ability<int>>> AddAbility(const std::string& scriptName, const int defaultValue = 0)
-        {
-            if(m_abilities.find(scriptName) != m_abilities.end())
-            {
-                return {};
-            }
+        std::string Name() const;
+        uint64_t ID() const;
 
-            std::stringstream sstream;
-            sstream << "./scripts/components/abilities/" << scriptName << ".lua"; 
-            auto ability = std::make_shared<components::Ability<int>>(sstream.str(), defaultValue);
-            m_abilities.insert(std::make_pair(ability->ShortName(), ability));
-            return ability;
-        }
+        std::optional<std::shared_ptr<components::Ability<int>>> AddAbility(const std::string& scriptName, const int defaultValue = 0);
+
+        virtual nlohmann::json Save() const;
+        virtual const void Load(const nlohmann::json& content);
     };
 }

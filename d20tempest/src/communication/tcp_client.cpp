@@ -155,7 +155,7 @@ namespace d20tempest::communication
             }
             
             //A msg should at least contains a msg or a partyID
-            if(!docJson.contains("name") || !docJson.contains("action") || !docJson.contains("entity"))
+            if(!docJson.contains("action") || !docJson.contains("entity"))
             {
                 nlohmann::json error;
                 error["code"] = 400;
@@ -166,43 +166,12 @@ namespace d20tempest::communication
 
             auto action = docJson["action"].get<std::string>();
             auto path = docJson["entity"].get<std::string>();
-            auto name = docJson["name"].get<std::string>();
 
             std::transform(action.begin(), action.end(), action.begin(), ::toupper); 
             std::transform(path.begin(), path.end(), path.begin(), ::toupper); 
 
-            //Create character handler
-            if(action == "CREATE" && path == "CHARACTER")
-            {
-                CreateCharacterHandler(name);
-                return;
-            }
-
-            //Load character handler
-            if(action == "LOAD" & path == "CHARACTER")
-            {
-                LoadCharacterHandler(name);
-                return;
-            }
-
-            //Load character handler
-            if(action == "LOAD" & path == "CHARACTER")
-            {
-                LoadCharacterHandler(name);
-                return;
-            }
-
-            if(!docJson.contains("data"))
-            {
-                nlohmann::json error;
-                error["code"] = 400;
-                error["msg"] = "Missing elements in JSON";
-                Send(error.dump());
-                return;
-            }
-
             //Data handler
-            DataCharacterHandler(name, path, action, docJson["data"]);
+            DataCharacterHandler(path, action, docJson["data"]);
         }
 
         void GetCharacter()
@@ -244,7 +213,7 @@ namespace d20tempest::communication
             Send(character->Save().dump(4));
         }
 
-        void DataCharacterHandler(const std::string& name, const std::string& entity, const std::string& action, const nlohmann::json& data)
+        void DataCharacterHandler(const std::string& entity, const std::string& action, const nlohmann::json& data)
         {
             if(m_messageHandlers.find(entity) == m_messageHandlers.end())
             {

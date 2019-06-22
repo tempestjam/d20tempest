@@ -1,12 +1,8 @@
 #include <iostream>
-#include <cassert>
-#include <chrono>
 #include <string>
 
-#include <filesystem>
-namespace fs = std::filesystem;
-
 #include "communication/tcp_server.hpp"
+#include "characters/character_factory.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -19,6 +15,7 @@ int main(int argc, char* argv[])
     // character->AddAbility("wisdom", 14);
     // character->AddAbility("charism", 20);
    
+    d20tempest::character::CharacterFactory factory;
     d20tempest::communication::TCPServer server("0.0.0.0", 7777);
     std::cout << "Server launched" << std::endl;
 

@@ -85,7 +85,13 @@
 			"thread": "cpp",
 			"codecvt": "cpp",
 			"fstream": "cpp",
-			"multi_span": "cpp"
+			"multi_span": "cpp",
+			"xxatomic": "cpp",
+			"any": "cpp",
+			"mutex": "cpp",
+			"condition_variable": "cpp",
+			"deque": "cpp",
+			"queue": "cpp"
 		}
 	}
 }

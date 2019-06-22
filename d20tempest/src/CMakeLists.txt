@@ -5,6 +5,9 @@ set(D20_TEMPEST_INCLUDE ../include)
 set(SOURCES
     main.cpp
 
+    threading/spin_lock.cpp 
+    threading/job_system.cpp
+
     characters/character.cpp
     characters/character_manager.cpp
 
@@ -16,6 +19,10 @@ set(SOURCES
     serialization/iserializable.cpp)
 
 set(HEADERS
+
+    ${D20_TEMPEST_INCLUDE}/threading/spin_lock.hpp
+    ${D20_TEMPEST_INCLUDE}/threading/job_system.hpp
+
     ${D20_TEMPEST_INCLUDE}/communication/iclient.hpp
     ${D20_TEMPEST_INCLUDE}/communication/tcp_server.hpp
     ${D20_TEMPEST_INCLUDE}/communication/tcp_client.hpp

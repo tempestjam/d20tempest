@@ -226,7 +226,7 @@ namespace d20tempest::communication
 
             for(auto& h : m_messageHandlers.at(entity))
             {
-                h(entity, action, data);
+                h(entity, action, data, m_interface);
             }
         }
     };

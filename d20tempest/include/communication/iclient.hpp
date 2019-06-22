@@ -3,11 +3,14 @@
 #include <functional>
 #include <optional>
 
+#include <gsl/gsl>
+
 #include <nlohmann/json.hpp>
 
 namespace d20tempest::communication
 {
-    using ClientMessageHandler = std::function<void(const std::string_view& path, const std::string_view& method, const nlohmann::json& data)>;
+    class IClient;
+    using ClientMessageHandler = std::function<void(const std::string_view& path, const std::string_view& method, const nlohmann::json& data, gsl::not_null<IClient*> client)>;
     using ClientDisconnectedHandler = std::function<void()>;
 
     class IClient

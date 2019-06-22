@@ -1,3 +1,5 @@
+#include "communication/iclient.hpp" 
+
 #include "characters/character.hpp"
 #include "characters/character_manager.hpp"
 
@@ -20,7 +22,10 @@ namespace d20tempest::character
                 manager.Dump(m_characterID);
             });
 
-            m_client.value()->OnMessage("character/ability" ,[this](const std::string_view& path, const std::string_view& action, const nlohmann::json& data)
+            m_client.value()->OnMessage("character/ability" ,[this](const std::string_view& path, 
+                                                                    const std::string_view& action, 
+                                                                    const nlohmann::json& data, 
+                                                                    gsl::not_null<communication::IClient*> client)
             {
                 //Change ability
                 if(action == "ADD")

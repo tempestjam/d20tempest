@@ -8,6 +8,8 @@ set(SOURCES
     threading/spin_lock.cpp 
     threading/job_system.cpp
 
+    event/event_channel.cpp 
+
     characters/character.cpp
     characters/character_manager.cpp
 
@@ -19,6 +21,7 @@ set(SOURCES
     serialization/iserializable.cpp)
 
 set(HEADERS
+    ${D20_TEMPEST_INCLUDE}/event/event_channel.hpp
 
     ${D20_TEMPEST_INCLUDE}/threading/spin_lock.hpp
     ${D20_TEMPEST_INCLUDE}/threading/job_system.hpp

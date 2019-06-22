@@ -17,19 +17,25 @@ namespace d20tempest::character
     class CharacterFactory
     {
         friend class Character;
-    private:
-        static std::map<uint64_t, std::shared_ptr<Character>> ms_characters;
     public:
-        std::shared_ptr<Character> CreateCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client);
-        std::shared_ptr<Character> LoadCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client);
+        CharacterFactory();
 
-        // void Dump();
-        // void Dump(uint64_t id);
-        // nlohmann::json DumpAll();
-        // nlohmann::json ListExistingCharacters();
+        CharacterFactory(const CharacterFactory& other) = delete;
+        CharacterFactory(CharacterFactory&& other) = delete;
 
+        CharacterFactory& operator=(const CharacterFactory& rhs) = delete;
+        CharacterFactory& operator=(CharacterFactory&& rhs) = delete;
+
+        ~CharacterFactory();
+
+        std::optional<Character> CreateCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client);
+        std::optional<Character> LoadCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client);
+
+    private:
         uint64_t CreateCharacterID();
+        communication::ClientEventChannel m_clientEventChannel;
+        event::EventKey m_eventKey;
 
-        // std::optional<std::shared_ptr<Character>> operator[](uint64_t id);
+        static constexpr char CharacterFactoryEntity[] = "CHARACTERS";
     };
 }

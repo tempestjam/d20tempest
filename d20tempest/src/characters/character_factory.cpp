@@ -10,39 +10,68 @@ namespace fs = std::filesystem;
 
 namespace d20tempest::character
 {
-    std::map<uint64_t, std::shared_ptr<Character>> CharacterFactory::ms_characters;
+    CharacterFactory::CharacterFactory()
+    {
+        m_eventKey = m_clientEventChannel.Register([this](const communication::IClientEventArg& arg)
+        {
+            if(arg.EventType != communication::IClientEventType::ClientMessage
+                || arg.Entity != CharacterFactoryEntity
+                || (arg.Action != communication::IClientAction::Create && arg.Action != communication::IClientAction::Get))
+            {
+                return;
+            }
 
-    std::shared_ptr<Character> CharacterFactory::CreateCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
+            if(arg.Action == communication::IClientAction::Create && !arg.Data.is_null())
+            {
+                //Create character
+                
+            }
+            else if(arg.Action == communication::IClientAction::Get && !arg.Data.is_null())
+            {
+                //Load a character
+            }
+            else if(arg.Action == communication::IClientAction::Get && arg.Data.is_null())
+            {
+                //Get existing characters
+            }
+        });
+    }
+
+    CharacterFactory::~CharacterFactory()
+    {
+        m_clientEventChannel.Unregister(m_eventKey);
+    }
+
+    std::optional<Character> CharacterFactory::CreateCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
     {
         std::stringstream sstream;
         sstream << Character::ms_charactersPath << name;
 
         if(fs::exists(sstream.str()))
         {
-            return nullptr;
+            return {};
         }
 
-        auto character = std::make_shared<Character>(CreateCharacterID(), name, client);
-        ms_characters.insert(std::make_pair(character->ID(), character));
+        Character character(CreateCharacterID(), name, client);
         return character;
     }
 
-    std::shared_ptr<Character> CharacterFactory::LoadCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
+    std::optional<Character> CharacterFactory::LoadCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
     {
         std::stringstream sstream;
         sstream << Character::ms_charactersPath << name;
 
         if(!fs::exists(sstream.str()))
         {
-            return nullptr;
+            return {};
         }
 
         std::ifstream file(sstream.str());
         nlohmann::json characterData;
         file >> characterData;
 
-        auto character = std::make_shared<Character>(CreateCharacterID(), name, client);
-        character->Deserialize(characterData);
+        Character character(CreateCharacterID(), name, client);
+        character.Deserialize(characterData);
 
         file.close();
         return character;

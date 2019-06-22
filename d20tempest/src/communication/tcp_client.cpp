@@ -56,17 +56,17 @@ namespace d20tempest::communication
 
             m_clientHandler->on<uvw::EndEvent>([this](const uvw::EndEvent& evt, uvw::TCPHandle& client)
             {
-                m_iClientEventChannel.Emit({IClientEventType::ClientLeave, "", "", nullptr, m_interface});
+                m_iClientEventChannel.Emit({IClientEventType::ClientLeave, "", IClientAction::None, nullptr, m_interface});
                 client.close();
             });
 
             m_clientHandler->on<uvw::ErrorEvent>([this](const uvw::ErrorEvent& evt, uvw::TCPHandle& client)
             {
-                m_iClientEventChannel.Emit({IClientEventType::ClientError, "", "", nullptr, m_interface});
+                m_iClientEventChannel.Emit({IClientEventType::ClientError, "", IClientAction::None, nullptr, m_interface});
                 client.close();
             });
 
-            m_iClientEventChannel.Emit({IClientEventType::ClientConnect, "", "", nullptr, m_interface});
+            m_iClientEventChannel.Emit({IClientEventType::ClientConnect, "", IClientAction::None, nullptr, m_interface});
         }
 
         ~TCPClientImpl()
@@ -130,7 +130,25 @@ namespace d20tempest::communication
             std::transform(path.begin(), path.end(), path.begin(), ::toupper); 
 
             //Data handler
-            m_iClientEventChannel.Emit({IClientEventType::ClientMessage, path, action, docJson["data"], m_interface});
+            auto actionEnum = IClientAction::None;
+            if(action == "CREATE")
+            {
+                actionEnum = IClientAction::Create;
+            }
+            else if(action == "GET")
+            {
+                actionEnum = IClientAction::Get;
+            }
+            else if(action == "ADD")
+            {
+                actionEnum = IClientAction::Add;
+            }
+            else if(action == "UPDATE")
+            {
+                actionEnum = IClientAction::Update;
+            }
+
+            m_iClientEventChannel.Emit({IClientEventType::ClientMessage, path, actionEnum, docJson["data"], m_interface});
         }
 
         void GetCharacter()
@@ -146,7 +164,7 @@ namespace d20tempest::communication
         void CreateCharacterHandler(const std::string& name)
         {
             auto character = m_characterFactory.CreateCharacter(name, std::make_optional(m_interface));
-            if(character == nullptr)
+            if(!character)
             {
                 nlohmann::json error;
                 error["code"] = 409;
@@ -161,7 +179,7 @@ namespace d20tempest::communication
         void LoadCharacterHandler(const std::string& name)
         {
             auto character = m_characterFactory.LoadCharacter(name, std::make_optional(m_interface));
-            if(character == nullptr)
+            if(!character)
             {
                 nlohmann::json error;
                 error["code"] = 404;

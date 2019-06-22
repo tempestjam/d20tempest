@@ -21,11 +21,20 @@ namespace d20tempest::communication
         ClientMessage
     };
 
+    enum class IClientAction : uint32_t
+    {
+        None,
+        Get,
+        Create,
+        Add,
+        Update
+    };
+
     struct IClientEventArg
     {
         IClientEventType EventType;
         const std::string_view& Entity;
-        const std::string_view& Action;
+        const IClientAction Action;
         const nlohmann::json& Data;
         gsl::not_null<IClient*> Client;
     };

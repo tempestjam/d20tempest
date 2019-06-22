@@ -15,37 +15,19 @@ namespace d20tempest::character
                 return;
             }
 
-            m_client.value()->OnLeave([this]()
+            m_clientEventChannel.Register([this](communication::IClientEventArg arg)
             {
-                //Save and destroy
-                CharacterFactory manager;
-                manager.Dump(m_characterID);
-            });
-
-            m_client.value()->OnMessage("character/ability" ,[this](const std::string_view& path, 
-                                                                    const std::string_view& action, 
-                                                                    const nlohmann::json& data, 
-                                                                    gsl::not_null<communication::IClient*> client)
-            {
-                //Change ability
-                if(action == "ADD")
+                switch (arg.EventType)
                 {
+                case communication::IClientEventType::ClientLeave : 
+                case communication::IClientEventType::ClientError : 
                     
-                }
-                else if(action == "UPDATE")
-                {
-                    
-                }
-                else if(action == "GET")
-                {
-                    
-                }
-                else if(action == "DELETE")
-                {
-                    
+                    break;
+                case communication::IClientEventType::ClientMessage :
+                    //TODO : Check path
+                    break;
                 }
             });
-
         }
 
     std::optional<std::shared_ptr<components::Ability<int>>> Character::AddAbility(const std::string& scriptName, const int defaultValue/* = 0*/)

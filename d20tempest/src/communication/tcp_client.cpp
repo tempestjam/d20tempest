@@ -12,8 +12,7 @@ namespace d20tempest::communication
         character::CharacterFactory m_characterFactory;  
         gsl::not_null<uvw::TCPHandle*> m_clientHandler;
 
-        std::map<std::string, std::vector<ClientMessageHandler>> m_messageHandlers;
-        std::vector<ClientDisconnectedHandler> m_disconnectionHandlers;
+        ClientEventChannel m_iClientEventChannel;
 
         bool m_heloParsed = false;
 
@@ -57,21 +56,17 @@ namespace d20tempest::communication
 
             m_clientHandler->on<uvw::EndEvent>([this](const uvw::EndEvent& evt, uvw::TCPHandle& client)
             {
-                for(auto& h : m_disconnectionHandlers)
-                {
-                    h();
-                }
+                m_iClientEventChannel.Emit({IClientEventType::ClientLeave, "", "", nullptr, m_interface});
                 client.close();
             });
 
             m_clientHandler->on<uvw::ErrorEvent>([this](const uvw::ErrorEvent& evt, uvw::TCPHandle& client)
             {
-                for(auto& h : m_disconnectionHandlers)
-                {
-                    h();
-                }
+                m_iClientEventChannel.Emit({IClientEventType::ClientError, "", "", nullptr, m_interface});
                 client.close();
             });
+
+            m_iClientEventChannel.Emit({IClientEventType::ClientConnect, "", "", nullptr, m_interface});
         }
 
         ~TCPClientImpl()
@@ -82,34 +77,6 @@ namespace d20tempest::communication
         uint64_t ConnectionId() const
         {
             return m_id;
-        }
-
-        void OnMessage(const std::string& path, ClientMessageHandler handler)
-        {
-            if(handler == nullptr)
-            {
-                return;
-            }
-
-            std::string toUpperPath = path;
-            std::transform(path.begin(), path.end(), toUpperPath.begin(), ::toupper); 
-
-            if(m_messageHandlers.find(toUpperPath) == m_messageHandlers.end())
-            {
-                m_messageHandlers.insert(std::make_pair(toUpperPath, std::vector<ClientMessageHandler>()));
-            }
-
-            m_messageHandlers.at(toUpperPath).push_back(handler);
-        }
-
-        void OnLeave(ClientDisconnectedHandler handler)
-        {
-            if(handler == nullptr)
-            {
-                return;
-            }
-
-            m_disconnectionHandlers.push_back(handler);
         }
 
         void Send(std::vector<std::byte>& msg)
@@ -163,7 +130,7 @@ namespace d20tempest::communication
             std::transform(path.begin(), path.end(), path.begin(), ::toupper); 
 
             //Data handler
-            DataCharacterHandler(path, action, docJson["data"]);
+            m_iClientEventChannel.Emit({IClientEventType::ClientMessage, path, action, docJson["data"], m_interface});
         }
 
         void GetCharacter()
@@ -204,23 +171,6 @@ namespace d20tempest::communication
             }
             Send(character->Save().dump(4));
         }
-
-        void DataCharacterHandler(const std::string& entity, const std::string& action, const nlohmann::json& data)
-        {
-            if(m_messageHandlers.find(entity) == m_messageHandlers.end())
-            {
-                nlohmann::json error;
-                error["code"] = 404;
-                error["msg"] = "Unknown entity";
-                Send(error.dump());
-                return;
-            }
-
-            for(auto& h : m_messageHandlers.at(entity))
-            {
-                h(entity, action, data, m_interface);
-            }
-        }
     };
 
     TCPClient::TCPClient(gsl::not_null<uvw::TCPHandle*> sock, const uint64_t connectionID)
@@ -231,16 +181,6 @@ namespace d20tempest::communication
     TCPClient::~TCPClient()
     {
         m_impl = nullptr;
-    }
-
-    void TCPClient::OnMessage(const std::string& path, ClientMessageHandler handler)
-    {
-        m_impl->OnMessage(path, handler);
-    }
-
-    void TCPClient::OnLeave(ClientDisconnectedHandler handler)
-    {
-        m_impl->OnLeave(handler);
     }
 
     void TCPClient::Send(std::vector<std::byte>& msg)

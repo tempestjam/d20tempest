@@ -18,9 +18,6 @@ namespace d20tempest::communication
         TCPClient(gsl::not_null<uvw::TCPHandle*> sock, const uint64_t connectionID);
         ~TCPClient();
 
-        virtual void OnMessage(const std::string& path, ClientMessageHandler handler) override;
-        virtual void OnLeave(ClientDisconnectedHandler handler) override;
-
         virtual void Send(std::vector<std::byte>& msg) override;
         virtual void Send(std::vector<std::byte>&& msg) override;
 

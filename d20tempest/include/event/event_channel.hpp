@@ -13,7 +13,8 @@ namespace d20tempest::event
 {
     enum class Events : uint64_t
     {
-        TestEvent
+        TestEvent,
+        IClientEvent,
     };
 
     using EventKey = uint64_t;

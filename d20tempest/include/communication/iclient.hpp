@@ -7,18 +7,34 @@
 
 #include <nlohmann/json.hpp>
 
+#include "event/event_channel.hpp"
+
 namespace d20tempest::communication
 {
     class IClient;
-    using ClientMessageHandler = std::function<void(const std::string_view& path, const std::string_view& method, const nlohmann::json& data, gsl::not_null<IClient*> client)>;
-    using ClientDisconnectedHandler = std::function<void()>;
+
+    enum class IClientEventType : uint32_t
+    {
+        ClientLeave,
+        ClientError,
+        ClientConnect,
+        ClientMessage
+    };
+
+    struct IClientEventArg
+    {
+        IClientEventType EventType;
+        const std::string_view& Entity;
+        const std::string_view& Action;
+        const nlohmann::json& Data;
+        gsl::not_null<IClient*> Client;
+    };
+
+    using ClientEventChannel = event::EventChannel<event::Events::IClientEvent, IClientEventArg>;
 
     class IClient
     {
     public:
-        virtual void OnMessage(const std::string& path, ClientMessageHandler handler) = 0;
-        virtual void OnLeave(ClientDisconnectedHandler handler) = 0;
-
         virtual void Send(std::vector<std::byte>& msg) = 0;
         virtual void Send(std::vector<std::byte>&& msg) = 0;
     };

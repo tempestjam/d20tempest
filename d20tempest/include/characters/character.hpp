@@ -24,6 +24,8 @@ namespace d20tempest::character
         
         std::optional<gsl::not_null<communication::IClient*>> m_client;
 
+        communication::ClientEventChannel m_clientEventChannel;
+
         static constexpr char ms_abilitiesScriptPath[] = "./scripts/components/abilities/";
         static constexpr char ms_scriptExtension[] = ".lua";
 

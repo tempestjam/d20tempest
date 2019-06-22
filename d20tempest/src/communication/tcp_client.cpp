@@ -28,6 +28,12 @@ namespace d20tempest::communication
         {
             m_clientHandler->on<uvw::DataEvent>([this](const uvw::DataEvent& evt, uvw::TCPHandle& client)
             {
+                if(m_heloParsed)
+                {
+                    ParseMsg(std::string(evt.data.get(), evt.length));
+                    return;
+                }
+
                 uint32_t firstFour = *((uint32_t*)evt.data.get());
                 firstFour = ntohl(firstFour);
                 if(evt.length >= 4 && firstFour == 0x00C0FFEE)
@@ -47,8 +53,6 @@ namespace d20tempest::communication
                     Send(error.dump());
                     return;
                 }
-
-                ParseMsg(std::string(evt.data.get(), evt.length));
             });
 
             m_clientHandler->on<uvw::EndEvent>([this](const uvw::EndEvent& evt, uvw::TCPHandle& client)
@@ -57,11 +61,16 @@ namespace d20tempest::communication
                 {
                     h();
                 }
+                client.close();
             });
 
             m_clientHandler->on<uvw::ErrorEvent>([this](const uvw::ErrorEvent& evt, uvw::TCPHandle& client)
             {
-                
+                for(auto& h : m_disconnectionHandlers)
+                {
+                    h();
+                }
+                client.close();
             });
         }
 

@@ -145,7 +145,7 @@ namespace d20tempest::communication
         void ParseMsg(const std::string& dataView)
         {
             auto docJson = nlohmann::json::parse(dataView, nullptr, false);
-            if(docJson.is_discarded())
+            if(docJson.is_discarded() || !docJson.contains("action") || !docJson.contains("entity"))
             {
                 nlohmann::json error;
                 error["code"] = 400;
@@ -154,16 +154,6 @@ namespace d20tempest::communication
                 return;
             }
             
-            //A msg should at least contains a msg or a partyID
-            if(!docJson.contains("action") || !docJson.contains("entity"))
-            {
-                nlohmann::json error;
-                error["code"] = 400;
-                error["msg"] = "Missing elements in JSON";
-                Send(error.dump());
-                return;
-            }
-
             auto action = docJson["action"].get<std::string>();
             auto path = docJson["entity"].get<std::string>();
 

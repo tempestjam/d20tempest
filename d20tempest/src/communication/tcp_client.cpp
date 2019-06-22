@@ -6,13 +6,6 @@
 
 namespace d20tempest::communication
 {   
-    enum class Messages : uint64_t
-    {
-        LeavePartyMsg = 0x00,
-        JoinPartyMsg  = 0x01,
-        ConnectionMsg = 0x02,
-    };
-
     class TCPClientImpl
     {
     private:

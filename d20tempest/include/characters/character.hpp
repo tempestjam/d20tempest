@@ -25,6 +25,7 @@ namespace d20tempest::character
         std::optional<gsl::not_null<communication::IClient*>> m_client;
 
         communication::ClientEventChannel m_clientEventChannel;
+        event::EventKey m_eventKey;
 
         static constexpr const char ms_charactersPath[] = "./characters/";
 
@@ -39,7 +40,7 @@ namespace d20tempest::character
         Character(const Character& other) = default;
         Character(Character&& other) = default;
 
-        virtual ~Character() = default;
+        virtual ~Character();
 
         Character& operator=(const Character& rhs) = default;
         Character& operator=(Character&& rhs) = default;

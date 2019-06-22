@@ -20,7 +20,7 @@ namespace d20tempest::character
                 return;
             }
 
-            m_clientEventChannel.Register([this](communication::IClientEventArg arg)
+            m_eventKey = m_clientEventChannel.Register([this](communication::IClientEventArg arg)
             {
                 switch (arg.EventType)
                 {
@@ -34,6 +34,12 @@ namespace d20tempest::character
                 }
             });
         }
+
+    Character::~Character()
+    {
+        Save();
+        m_clientEventChannel.Unregister(m_eventKey);
+    }
 
     std::optional<std::shared_ptr<components::Ability<int>>> Character::AddAbility(const std::string& scriptName, const int defaultValue/* = 0*/)
     {

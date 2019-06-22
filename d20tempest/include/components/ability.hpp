@@ -109,7 +109,7 @@ namespace d20tempest::components
             m_cacheInvalidated = true;
         }
 
-        virtual nlohmann::json Save() const
+        virtual nlohmann::json Serialize() const override
         {
             nlohmann::json root;
             root["value"] = m_abilityValue;
@@ -126,7 +126,7 @@ namespace d20tempest::components
             return root;
         }
 
-        virtual const void Load(const nlohmann::json& root)
+        virtual const void Deserialize(const nlohmann::json& root) override
         {
             if(root.is_discarded() &&
                 (root.find("value") == root.end() || root.find("temp") == root.end()))

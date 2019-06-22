@@ -1,3 +1,8 @@
+#include <filesystem>
+namespace fs = std::filesystem;
+#include <fstream>
+#include <sstream>
+
 #include "communication/iclient.hpp" 
 
 #include "characters/character.hpp"
@@ -44,7 +49,7 @@ namespace d20tempest::character
         return ability;
     }
 
-    nlohmann::json Character::Save() const
+    nlohmann::json Character::Serialize() const
     {
         nlohmann::json root;
         
@@ -55,14 +60,14 @@ namespace d20tempest::character
         std::map<std::string, nlohmann::json> serializedAbilities;
         for(auto&[key, ability] : m_abilities)
         {
-            serializedAbilities.insert(std::make_pair(key, ability->Save()));
+            serializedAbilities.insert(std::make_pair(key, ability->Serialize()));
         }
         root["abilities"] = serializedAbilities;
 
         return root;
     }
 
-    const void Character::Load(const nlohmann::json& root)
+    const void Character::Deserialize(const nlohmann::json& root)
     {
         if(root.is_discarded() &&
             (root.find("name") == root.end() || root.find("abilities") == root.end()) || root.find("id") == root.end())
@@ -78,11 +83,31 @@ namespace d20tempest::character
             std::stringstream sstream;
             sstream << ms_abilitiesScriptPath << key << ms_scriptExtension; 
             auto ability = std::make_shared<components::Ability<int>>(sstream.str());
-            ability->Load(value);
+            ability->Deserialize(value);
             m_abilities.insert(std::make_pair(key, ability));
         }
     }
 
+    void Character::Save()
+    {
+        if(!fs::exists(ms_charactersPath))
+        {
+            fs::create_directories(ms_charactersPath);
+        }
+
+        std::stringstream sstream;
+        sstream << ms_charactersPath << Name();
+
+        if(fs::exists(sstream.str()))
+        {
+            fs::remove(sstream.str());
+        }
+        std::ofstream file(sstream.str(), std::ios::binary);
+        file << std::setw(4) << Serialize();
+        file.flush();
+        file.close();
+    }
+    
     std::string Character::Name() const
     {
         return m_name;

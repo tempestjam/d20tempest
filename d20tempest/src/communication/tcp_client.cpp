@@ -155,8 +155,7 @@ namespace d20tempest::communication
                 return;
             }
 
-            m_characterFactory.Dump(character->ID());
-            Send(character->Save().dump(4));
+            Send(character->Serialize().dump(4));
         }
 
         void LoadCharacterHandler(const std::string& name)
@@ -169,7 +168,7 @@ namespace d20tempest::communication
                 error["msg"] = "Unknown entity";
                 Send(error.dump());
             }
-            Send(character->Save().dump(4));
+            Send(character->Serialize().dump(4));
         }
     };
 

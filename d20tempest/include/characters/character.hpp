@@ -26,6 +26,8 @@ namespace d20tempest::character
 
         communication::ClientEventChannel m_clientEventChannel;
 
+        static constexpr const char ms_charactersPath[] = "./characters/";
+
         static constexpr char ms_abilitiesScriptPath[] = "./scripts/components/abilities/";
         static constexpr char ms_scriptExtension[] = ".lua";
 
@@ -45,9 +47,11 @@ namespace d20tempest::character
         std::string Name() const;
         uint64_t ID() const;
 
+        void Save();
+
         std::optional<std::shared_ptr<components::Ability<int>>> AddAbility(const std::string& scriptName, const int defaultValue = 0);
 
-        virtual nlohmann::json Save() const;
-        virtual const void Load(const nlohmann::json& content);
+        virtual nlohmann::json Serialize() const override;
+        virtual const void Deserialize(const nlohmann::json& content) override;
     };
 }

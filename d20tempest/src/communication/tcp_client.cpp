@@ -150,44 +150,6 @@ namespace d20tempest::communication
 
             m_iClientEventChannel.Emit({IClientEventType::ClientMessage, path, actionEnum, docJson["data"], m_interface});
         }
-
-        void GetCharacter()
-        {
-
-        }
-
-        void ListCharacters()
-        {
-
-        }
-
-        void CreateCharacterHandler(const std::string& name)
-        {
-            auto character = m_characterFactory.CreateCharacter(name, std::make_optional(m_interface));
-            if(!character)
-            {
-                nlohmann::json error;
-                error["code"] = 409;
-                error["msg"] = "Unable to create character (already exist?)";
-                Send(error.dump());
-                return;
-            }
-
-            Send(character->Serialize().dump(4));
-        }
-
-        void LoadCharacterHandler(const std::string& name)
-        {
-            auto character = m_characterFactory.LoadCharacter(name, std::make_optional(m_interface));
-            if(!character)
-            {
-                nlohmann::json error;
-                error["code"] = 404;
-                error["msg"] = "Unknown entity";
-                Send(error.dump());
-            }
-            Send(character->Serialize().dump(4));
-        }
     };
 
     TCPClient::TCPClient(gsl::not_null<uvw::TCPHandle*> sock, const uint64_t connectionID)

@@ -9,13 +9,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include "characters/character_manager.hpp"
 #include "communication/iclient.hpp"
 
 namespace d20tempest::character
 {
     class Character;
-    class CharacterManager
+    class CharacterFactory
     {
     private:
         static std::map<uint64_t, std::shared_ptr<Character>> ms_characters;

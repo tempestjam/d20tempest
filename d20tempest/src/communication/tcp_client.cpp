@@ -1,6 +1,6 @@
 #include <nlohmann/json.hpp>
 
-#include "characters/character_manager.hpp"
+#include "characters/character_factory.hpp"
 #include "characters/character.hpp"
 #include "communication/tcp_client.hpp"
 
@@ -16,7 +16,7 @@ namespace d20tempest::communication
     class TCPClientImpl
     {
     private:
-        character::CharacterManager m_manager;  
+        character::CharacterFactory m_characterFactory;  
         gsl::not_null<uvw::TCPHandle*> m_clientHandler;
 
         std::map<std::string, std::vector<ClientMessageHandler>> m_messageHandlers;
@@ -176,7 +176,7 @@ namespace d20tempest::communication
 
         void CreateCharacterHandler(const std::string& name)
         {
-            auto character = m_manager.CreateCharacter(name, std::make_optional(m_interface));
+            auto character = m_characterFactory.CreateCharacter(name, std::make_optional(m_interface));
             if(character == nullptr)
             {
                 nlohmann::json error;
@@ -186,13 +186,13 @@ namespace d20tempest::communication
                 return;
             }
 
-            m_manager.Dump(character->ID());
+            m_characterFactory.Dump(character->ID());
             Send(character->Save().dump(4));
         }
 
         void LoadCharacterHandler(const std::string& name)
         {
-            auto character = m_manager.LoadCharacter(name, std::make_optional(m_interface));
+            auto character = m_characterFactory.LoadCharacter(name, std::make_optional(m_interface));
             if(character == nullptr)
             {
                 nlohmann::json error;

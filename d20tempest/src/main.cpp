@@ -7,8 +7,6 @@
 namespace fs = std::filesystem;
 
 #include "communication/tcp_server.hpp"
-#include "components/ability.hpp"
-#include "characters/character_manager.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -25,7 +23,4 @@ int main(int argc, char* argv[])
     std::cout << "Server launched" << std::endl;
 
     std::cin.ignore();
-
-    d20tempest::character::CharacterManager manager;
-    manager.Dump();
 }

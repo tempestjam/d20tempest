@@ -1,4 +1,4 @@
-#include "characters/character_manager.hpp"
+#include "characters/character_factory.hpp"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -10,9 +10,9 @@ namespace fs = std::filesystem;
 
 namespace d20tempest::character
 {
-    std::map<uint64_t, std::shared_ptr<Character>> CharacterManager::ms_characters;
+    std::map<uint64_t, std::shared_ptr<Character>> CharacterFactory::ms_characters;
 
-    std::shared_ptr<Character> CharacterManager::CreateCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
+    std::shared_ptr<Character> CharacterFactory::CreateCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
     {
         std::stringstream sstream;
         sstream << ms_charactersPath << name;
@@ -27,7 +27,7 @@ namespace d20tempest::character
         return character;
     }
 
-    std::shared_ptr<Character> CharacterManager::LoadCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
+    std::shared_ptr<Character> CharacterFactory::LoadCharacter(std::string name, std::optional<gsl::not_null<communication::IClient*>> client)
     {
         std::stringstream sstream;
         sstream << ms_charactersPath << name;
@@ -48,12 +48,12 @@ namespace d20tempest::character
         return character;
     }
 
-    uint64_t CharacterManager::CreateCharacterID()
+    uint64_t CharacterFactory::CreateCharacterID()
     {
         return 0x00ui64;
     }
 
-    void CharacterManager::Dump()
+    void CharacterFactory::Dump()
     {
         if(!fs::exists(ms_charactersPath))
         {
@@ -76,7 +76,7 @@ namespace d20tempest::character
         }
     }
 
-    void CharacterManager::Dump(uint64_t id)
+    void CharacterFactory::Dump(uint64_t id)
     {
         if(ms_characters.find(id) == ms_characters.end())
         {
@@ -102,7 +102,7 @@ namespace d20tempest::character
         file.close();
     }
 
-    nlohmann::json CharacterManager::DumpAll()
+    nlohmann::json CharacterFactory::DumpAll()
     {
         nlohmann::json dat;
 
@@ -114,14 +114,14 @@ namespace d20tempest::character
         return dat;
     }
 
-    nlohmann::json CharacterManager::ListExistingCharacters()
+    nlohmann::json CharacterFactory::ListExistingCharacters()
     {
         nlohmann::json dat;
         //TODO : implement
         return dat;
     }
 
-    std::optional<std::shared_ptr<Character>> CharacterManager::operator[](uint64_t id)
+    std::optional<std::shared_ptr<Character>> CharacterFactory::operator[](uint64_t id)
     {
         if(ms_characters.find(id) == ms_characters.end())
         {

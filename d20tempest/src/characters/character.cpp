@@ -1,7 +1,7 @@
 #include "communication/iclient.hpp" 
 
 #include "characters/character.hpp"
-#include "characters/character_manager.hpp"
+#include "characters/character_factory.hpp"
 
 namespace d20tempest::character
 {
@@ -18,7 +18,7 @@ namespace d20tempest::character
             m_client.value()->OnLeave([this]()
             {
                 //Save and destroy
-                CharacterManager manager;
+                CharacterFactory manager;
                 manager.Dump(m_characterID);
             });
 
